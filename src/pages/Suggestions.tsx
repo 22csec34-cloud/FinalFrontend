@@ -150,7 +150,39 @@ const Suggestions = () => {
                                     </div>
 
                                     <div className="pt-4 flex gap-4">
-                                        <Button className="flex-1 h-12 text-lg">Save to Favorites</Button>
+                                        <Button
+                                            className="flex-1 h-12 text-lg"
+                                            onClick={async () => {
+                                                if (!suggestions || !setId) return;
+                                                try {
+                                                    const res = await fetch('http://localhost:5000/api/user/favorites', {
+                                                        method: 'POST',
+                                                        headers: {
+                                                            'Content-Type': 'application/json',
+                                                            'Authorization': `Bearer ${token}`
+                                                        },
+                                                        body: JSON.stringify({
+                                                            setId,
+                                                            imageUrl: mainImage?.url,
+                                                            description: mainImage?.description,
+                                                            styling: suggestions.styling,
+                                                            accessories: suggestions.accessories,
+                                                            occasions: suggestions.occasions
+                                                        })
+                                                    });
+                                                    if (res.ok) {
+                                                        toast.success("Saved to Favorites!");
+                                                    } else {
+                                                        const err = await res.json();
+                                                        toast.error(err.error || "Failed to save");
+                                                    }
+                                                } catch (e) {
+                                                    toast.error("Network error");
+                                                }
+                                            }}
+                                        >
+                                            Save to Favorites
+                                        </Button>
                                         <Button variant="outline" className="flex-1 h-12 text-lg">Share Look</Button>
                                     </div>
                                 </div>

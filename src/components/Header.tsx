@@ -29,33 +29,40 @@ const Header = () => {
           </div>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
+        <nav className="hidden md:flex items-center gap-6">
           {isAuthenticated ? (
             <>
-              <Link to="/generate" className="text-foreground hover:text-accent transition-colors">
-                Try-On
-              </Link>
-              <Link to="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors">
-                Dashboard
-              </Link>
-              <Link to="/gallery" className="text-muted-foreground hover:text-foreground transition-colors">
-                Gallery
-              </Link>
-              <Button variant="ghost" onClick={handleLogout} className="gap-2">
-                <LogOut className="w-4 h-4" /> Logout
+              <div className="flex items-center gap-6 mr-4 border-r border-border pr-6">
+                <Link to="/dashboard" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+                  Dashboard
+                </Link>
+                <Link to="/generate" className="text-sm font-medium text-foreground hover:text-accent transition-colors">
+                  Generate
+                </Link>
+                <Link to="/gallery" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+                  Gallery
+                </Link>
+                <Link to="/favorites" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+                  Favorites
+                </Link>
+              </div>
+
+              <Button variant="ghost" size="sm" onClick={handleLogout} className="gap-2 text-muted-foreground hover:text-red-400">
+                <LogOut className="w-4 h-4" />
+                <span className="hidden lg:inline">Logout</span>
               </Button>
             </>
           ) : (
-            <>
+            <div className="flex items-center gap-4">
               <Link to="/login">
-                <Button variant="ghost" className="gap-2">
-                  <LogIn className="w-4 h-4" /> Login
-                </Button>
+                <Button variant="ghost" size="sm">Login</Button>
               </Link>
               <Link to="/signup">
-                <Button variant="default">Sign Up</Button>
+                <Button size="sm" className="bg-gradient-gold text-white hover:opacity-90 transition-opacity">
+                  Sign Up
+                </Button>
               </Link>
-            </>
+            </div>
           )}
         </nav>
       </div>

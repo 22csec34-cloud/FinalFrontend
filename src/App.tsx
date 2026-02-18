@@ -13,6 +13,7 @@ import Suggestions from "./pages/Suggestions";
 import Cart from "./pages/Cart";
 import Tracking from "./pages/Tracking";
 import LiveTryOn from "./pages/LiveTryOn";
+import Favorites from "./pages/Favorites";
 
 import { StorageProvider } from "@/context/StorageContext";
 import { AuthProvider } from "@/context/AuthContext";
@@ -44,6 +45,7 @@ const App = () => (
                   <Route path="/cart" element={<Cart />} />
                   <Route path="/tracking" element={<Tracking />} />
                   <Route path="/try-on" element={<LiveTryOn />} />
+                  <Route path="/favorites" element={<Favorites />} />
                 </Route>
 
                 {/* Catch all */}

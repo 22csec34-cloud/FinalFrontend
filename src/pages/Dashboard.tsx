@@ -1,3 +1,4 @@
+import React from "react";
 import { useAuth } from "@/context/AuthContext";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -40,12 +41,32 @@ const Dashboard = () => {
     reader.readAsDataURL(file);
   };
 
-  // Mock data for trending styles (keep mock for now as we don't have a backend feed)
-  const trendingStyles = [
+  // State for trending styles with initial mock data fallback
+  const [trendingStyles, setTrendingStyles] = React.useState([
     { id: 1, title: "Cyberpunk Street", image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3", likes: 234 },
     { id: 2, title: "Minimalist Chic", image: "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3", likes: 189 },
     { id: 3, title: "Boho Festival", image: "https://images.unsplash.com/photo-1529139574466-a302d27f60d0?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3", likes: 156 },
-  ];
+  ]);
+
+  // Fetch trending styles from Grok API via backend
+  React.useEffect(() => {
+    const fetchTrends = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/trending");
+        if (response.ok) {
+          const data = await response.json();
+          // Ensure we have at least 3 items, otherwise keep fallback
+          if (Array.isArray(data) && data.length > 0) {
+            setTrendingStyles(data);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch trending styles", error);
+      }
+    };
+
+    fetchTrends();
+  }, []);
 
   const recentActivity = savedImages.slice(0, 3); // Show last 3 generated images
 
