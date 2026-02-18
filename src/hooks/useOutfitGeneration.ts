@@ -28,9 +28,17 @@ export function useOutfitGeneration() {
   const generateSingleView = useCallback(async (
     userImage: string,
     outfitDescription: string,
-    viewType: ViewType
+    viewType: ViewType,
+    firstImageUrl?: string | null
   ): Promise<string | null> => {
     try {
+      const bodyPayload: Record<string, string> = { userImage, outfitDescription, viewType };
+
+      // For outfit view, send the first generated image URL
+      if (viewType === 'outfit' && firstImageUrl) {
+        bodyPayload.firstImageUrl = firstImageUrl;
+      }
+
       // Use local backend instead of Supabase
       const response = await fetch('http://localhost:5000/api/generate-outfit', {
         method: 'POST',
@@ -38,7 +46,7 @@ export function useOutfitGeneration() {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem("token")}`
         },
-        body: JSON.stringify({ userImage, outfitDescription, viewType }),
+        body: JSON.stringify(bodyPayload),
       });
 
       const data = await response.json();
@@ -66,14 +74,25 @@ export function useOutfitGeneration() {
     setGeneratedImages(defaultImages);
 
     const viewTypes: ViewType[] = ["front", "left", "back", "outfit"];
+    let firstGeneratedUrl: string | null = null;
 
     for (const viewType of viewTypes) {
       setCurrentView(viewType);
       toast.info(`Generating ${viewType} view...`);
 
-      const imageUrl = await generateSingleView(userImage, outfitDescription, viewType);
+      const imageUrl = await generateSingleView(
+        userImage,
+        outfitDescription,
+        viewType,
+        viewType === 'outfit' ? firstGeneratedUrl : null
+      );
 
       if (imageUrl) {
+        // Save the first generated image URL (front view)
+        if (viewType === 'front') {
+          firstGeneratedUrl = imageUrl;
+        }
+
         setGeneratedImages((prev) =>
           prev.map((img) =>
             img.id === viewType ? { ...img, url: imageUrl } : img
