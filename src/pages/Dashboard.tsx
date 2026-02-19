@@ -41,21 +41,16 @@ const Dashboard = () => {
     reader.readAsDataURL(file);
   };
 
-  // State for trending styles with initial mock data fallback
-  const [trendingStyles, setTrendingStyles] = React.useState([
-    { id: 1, title: "Cyberpunk Street", image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3", likes: 234 },
-    { id: 2, title: "Minimalist Chic", image: "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3", likes: 189 },
-    { id: 3, title: "Boho Festival", image: "https://images.unsplash.com/photo-1529139574466-a302d27f60d0?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3", likes: 156 },
-  ]);
+  // Always fetch fresh from Grok API — no defaults
+  const [trendingStyles, setTrendingStyles] = React.useState<any[]>([]);
 
-  // Fetch trending styles from Grok API via backend
+  // Fetch fresh trending styles on every page load
   React.useEffect(() => {
     const fetchTrends = async () => {
       try {
         const response = await fetch("http://localhost:5000/api/trending");
         if (response.ok) {
           const data = await response.json();
-          // Ensure we have at least 3 items, otherwise keep fallback
           if (Array.isArray(data) && data.length > 0) {
             setTrendingStyles(data);
           }
@@ -207,25 +202,55 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {/* Trending Styles */}
-            <div className="space-y-6 animate-slide-up" style={{ animationDelay: "300ms" }}>
+            {/* Trending Styles - Full Width Horizontal Scroll */}
+            <div className="lg:col-span-3 space-y-6 animate-slide-up" style={{ animationDelay: "300ms" }}>
               <div className="flex items-center justify-between">
                 <h2 className="font-serif text-xl font-semibold">Trending Now</h2>
                 <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-foreground">Explore</Button>
               </div>
-              <div className="space-y-4">
-                {trendingStyles.map((style) => (
-                  <div key={style.id} className="group relative overflow-hidden rounded-lg aspect-video cursor-pointer">
-                    <img src={style.image} alt={style.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-100" />
-                    <div className="absolute bottom-3 left-3">
-                      <p className="text-white font-medium text-sm">{style.title}</p>
-                      <div className="flex items-center gap-1 text-xs text-white/70">
-                        <Heart className="w-3 h-3 text-red-500 fill-red-500" /> {style.likes} likes
+              <div
+                className="flex gap-4 overflow-x-auto pb-4 -mx-2 px-2 md:-mx-0 md:px-0 snap-x snap-mandatory"
+                style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(255,255,255,0.15) transparent' }}
+              >
+                {trendingStyles.length > 0 ? trendingStyles.map((style) => (
+                  <div
+                    key={style.id}
+                    className="group relative min-w-[220px] w-[220px] md:min-w-[240px] md:w-[240px] flex-shrink-0 overflow-hidden rounded-xl cursor-pointer snap-start border border-white/5 hover:border-accent/40 transition-all duration-300"
+                  >
+                    <div className="aspect-[3/4] w-full overflow-hidden bg-surface-elevated/30">
+                      <img
+                        src={style.image}
+                        alt={style.title}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        loading="lazy"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = `https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&h=500&fit=crop`;
+                        }}
+                      />
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent opacity-100" />
+                    <div className="absolute bottom-0 left-0 right-0 p-4">
+                      <p className="text-white font-semibold text-sm mb-0.5">{style.title}</p>
+                      {style.tag && (
+                        <p className="text-[10px] text-accent/80 mb-1.5 truncate">{style.tag}</p>
+                      )}
+                      <div className="flex items-center gap-1.5 text-xs text-white/70">
+                        <Heart className="w-3 h-3 text-red-400 fill-red-400" /> {style.likes} likes
                       </div>
                     </div>
                   </div>
-                ))}
+                )) : (
+                  // Loading skeletons while fetching from Grok
+                  Array.from({ length: 6 }).map((_, idx) => (
+                    <div key={idx} className="min-w-[220px] w-[220px] md:min-w-[240px] md:w-[240px] flex-shrink-0 rounded-xl border border-white/5 overflow-hidden">
+                      <div className="aspect-[3/4] w-full bg-surface-elevated/30 animate-pulse" />
+                      <div className="p-4 space-y-2">
+                        <div className="h-3 w-3/4 bg-white/10 rounded animate-pulse" />
+                        <div className="h-2 w-1/2 bg-white/5 rounded animate-pulse" />
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>
