@@ -9,7 +9,7 @@ import { Link } from "react-router-dom";
 import { useStorage } from "@/context/StorageContext";
 
 const Dashboard = () => {
-  const { savedImages, cartItems } = useStorage();
+  const { savedImages, cartItems, orders, fetchOrders } = useStorage();
   const { user, login } = useAuth(); // Assuming login updates the user state in context
 
   const handleProfileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,6 +62,30 @@ const Dashboard = () => {
 
     fetchTrends();
   }, []);
+
+  // Fetch user orders on mount
+  React.useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  // Dynamic order status
+  const latestOrder = orders && orders.length > 0 ? orders[0] : null;
+  const orderStatusLabel = latestOrder?.status || "No Orders";
+  const isOrderActive = latestOrder && latestOrder.status !== "Delivered";
+  const estimatedDeliveryDisplay = latestOrder?.estimatedDelivery
+    ? new Date(latestOrder.estimatedDelivery).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+    : "—";
+
+  // Time since last status update
+  const getTimeSince = (dateStr: string) => {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    const days = Math.floor(hrs / 24);
+    return `${days}d ago`;
+  };
 
   const recentActivity = savedImages.slice(0, 3); // Show last 3 generated images
 
@@ -145,14 +169,34 @@ const Dashboard = () => {
             </Link>
 
             <Link to="/tracking">
-              <Card className="bg-surface-elevated/50 backdrop-blur-sm border-white/10 hover:border-accent/30 transition-all duration-300 cursor-pointer hover:bg-white/5">
+              <Card className="bg-surface-elevated/50 backdrop-blur-sm border-white/10 hover:border-green-500/30 transition-all duration-300 cursor-pointer hover:bg-green-500/5 group">
                 <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
                   <CardTitle className="text-sm font-medium text-muted-foreground">Order Status</CardTitle>
-                  <Truck className="w-4 h-4 text-green-400" />
+                  <div className="relative">
+                    <Truck className="w-4 h-4 text-green-400 group-hover:text-green-300 transition-colors" />
+                    {isOrderActive && (
+                      <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-green-400 animate-status-pulse" />
+                    )}
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-lg font-bold text-foreground">In Stitching</div>
-                  <p className="text-xs text-muted-foreground mt-1">Est. Delivery: Feb 10</p>
+                  <div className="flex items-center gap-2">
+                    {isOrderActive && (
+                      <span className="relative flex h-2.5 w-2.5 flex-shrink-0">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75" />
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500" />
+                      </span>
+                    )}
+                    <div className="text-lg font-bold text-foreground">{orderStatusLabel}</div>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {latestOrder
+                      ? `Est. Delivery: ${estimatedDeliveryDisplay}`
+                      : "Place your first order!"}
+                  </p>
+                  {latestOrder?.updatedAt && (
+                    <p className="text-[10px] text-green-400/70 mt-0.5">Updated {getTimeSince(latestOrder.updatedAt)}</p>
+                  )}
                 </CardContent>
               </Card>
             </Link>
