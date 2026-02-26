@@ -1,0 +1,20 @@
+# ===================================
+# Style Weaver Frontend - Node.js Dependencies
+# ===================================
+# This is a Node.js/React project. There are no Python dependencies.
+#
+# To install all packages, run:
+#   npm install
+#
+# The full list of npm packages is defined in package.json
+# Key dependencies include:
+#   - react & react-dom (UI framework)
+#   - react-router-dom (routing)
+#   - @supabase/supabase-js (database/auth)
+#   - @tanstack/react-query (data fetching)
+#   - tailwindcss (styling)
+#   - shadcn-ui / radix-ui (UI components)
+#   - recharts (charts)
+#   - vite (build tool)
+#   - typescript (type safety)
+#   - vitest (testing)
